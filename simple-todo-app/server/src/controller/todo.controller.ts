@@ -27,7 +27,7 @@ export async function getAllTodosByUsername(
 ): Promise<void> {
   try {
     const user = req.params;
-    const data = await todoService.getAllTodos(user.username);
+    const data = await todoService.getAllTodosByUsername(user.username);
     res.send(data);
   } catch (error) {
     next(error);

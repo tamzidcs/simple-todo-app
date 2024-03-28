@@ -1,5 +1,6 @@
 import { error } from "console";
 import User from "../db/models/User";
+import * as UserRepo from "../repository/userRepo";
 import * as bcrypt from "bcrypt";
 import { UNAUTHORIZED, OK, CREATED, CONFLICT, INTERNAL_SERVER_ERROR } from "http-status";
 
@@ -19,6 +20,10 @@ const loginSuccessfullMessage = "Login successfull.";
 const userAlreadyExistMessage = "User already exists";
 const userCreatedMessage = "User created.";
 const registrationFailed = "User registration failed.";
+interface GetAllUserResponse {
+  id?: string,
+  username: string
+}
 
 async function createNewUser(username: string, password: string) {
   const user = new User({
@@ -26,7 +31,7 @@ async function createNewUser(username: string, password: string) {
     password: password,
   });
 
-  const existingUser = await User.findOne({ where: { username: username } });
+  const existingUser = await UserRepo.getUserByUsername(user.username);
   if (existingUser) {
     return { userCreated: false, message: userAlreadyExistMessage };
   } else {
@@ -81,7 +86,7 @@ export async function registerUser(newUser: User): Promise<RegisterResponse> {
 }
 
 export async function loginUser(user: User): Promise<LoginResponse | null> {
-  const checkUser = await User.findOne({ where: { username: user.username } });
+  const checkUser = await UserRepo.getUserByUsername(user.username);
   if (!checkUser) {
     return {
       statusCode: UNAUTHORIZED,
@@ -99,7 +104,7 @@ export async function loginUser(user: User): Promise<LoginResponse | null> {
   };
 }
 
-export async function getAllUsers(): Promise<User[]> {
-  const users = await User.findAll();
+export async function getAllUsers(): Promise<GetAllUserResponse[]> {
+  const users:GetAllUserResponse[]  = await User.findAll({attributes:['id','username']});
   return users;
 }
